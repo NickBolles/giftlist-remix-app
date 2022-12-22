@@ -7,11 +7,15 @@ async function seed() {
   const email = "test@nickbolles.com";
 
   // cleanup the existing database
-  await prisma.user.delete({ where: { email } }).catch(() => {
-    // no worries if it doesn't exist yet
-  });
+  // await prisma.user.delete({ where: { email } }).catch(() => {
+  //   // no worries if it doesn't exist yet
+  // });
+  await prisma.giftsOnGiftLists.deleteMany({})
+  await prisma.gift.deleteMany({})
+  await prisma.giftList.deleteMany({})
+  await prisma.user.deleteMany({})
 
-  const hashedPassword = await bcrypt.hash("racheliscool", 10);
+  const hashedPassword = await bcrypt.hash("foobarfoobar", 10);
 
   const user = await prisma.user.create({
     data: {
