@@ -3,36 +3,35 @@ import { json, redirect } from "@remix-run/node";
 import { Form, useCatch, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 
-import { deleteNote, getNote } from "~/models/giftLists.server";
+import { deleteGiftList, getGiftList } from "~/models/giftLists.server";
 import { requireUserId } from "~/session.server";
 
 export async function loader({ request, params }: LoaderArgs) {
   const userId = await requireUserId(request);
-  invariant(params.noteId, "noteId not found");
+  invariant(params.listId, "gift list not found");
 
-  const note = await getNote({ userId, id: params.noteId });
-  if (!note) {
+  const giftList = await getGiftList({ userId, id: params.listId });
+  if (!giftList) {
     throw new Response("Not Found", { status: 404 });
   }
-  return json({ note });
+  return json({ giftList });
 }
 
 export async function action({ request, params }: ActionArgs) {
   const userId = await requireUserId(request);
-  invariant(params.noteId, "noteId not found");
+  invariant(params.listId, "gift list not found");
 
-  await deleteNote({ userId, id: params.noteId });
+  await deleteGiftList({ userId, id: params.listId });
 
-  return redirect("/notes");
+  return redirect("/lists");
 }
 
-export default function NoteDetailsPage() {
+export default function GiftListDetailsPage() {
   const data = useLoaderData<typeof loader>();
 
   return (
     <div>
-      <h3 className="text-2xl font-bold">{data.note.title}</h3>
-      <p className="py-6">{data.note.body}</p>
+      <h3 className="text-2xl font-bold">{data.giftList.name}</h3>
       <hr className="my-4" />
       <Form method="post">
         <button
@@ -42,6 +41,18 @@ export default function NoteDetailsPage() {
           Delete
         </button>
       </Form>
+      <div>
+        {data.giftList.gifts.map(({ gift }) => (
+          <a href={gift.link} key={gift.id}>
+            <div>
+              <h1>{gift.title}</h1>
+              <img src={gift.imageUrl} />
+              <p>{gift.notes}</p>
+              {gift.createdAt}
+            </div>
+          </a>
+        ))}
+      </div>
     </div>
   );
 }

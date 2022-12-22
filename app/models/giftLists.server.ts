@@ -1,40 +1,38 @@
-import type { User, Note } from "@prisma/client";
+import type { User, GiftList } from "@prisma/client";
 
 import { prisma } from "~/db.server";
 
-export type { Note } from "@prisma/client";
+export type { GiftList } from "@prisma/client";
 
-export function getNote({
+export function getGiftList({
   id,
   userId,
-}: Pick<Note, "id"> & {
+}: Pick<GiftList, "id"> & {
   userId: User["id"];
 }) {
-  return prisma.note.findFirst({
-    select: { id: true, body: true, title: true },
+  return prisma.giftList.findFirst({
+    select: { id: true, name: true, gifts: { include: {gift: true}} },
     where: { id, userId },
   });
 }
 
-export function getNoteListItems({ userId }: { userId: User["id"] }) {
-  return prisma.note.findMany({
+export function getGiftListItems({ userId }: { userId: User["id"] }) {
+  return prisma.giftList.findMany({
     where: { userId },
-    select: { id: true, title: true },
+    select: { id: true, name: true },
     orderBy: { updatedAt: "desc" },
   });
 }
 
-export function createNote({
-  body,
-  title,
+export function createGiftList({
+  name,
   userId,
-}: Pick<Note, "body" | "title"> & {
+}: Pick<GiftList, "name"> & {
   userId: User["id"];
 }) {
-  return prisma.note.create({
+  return prisma.giftList.create({
     data: {
-      title,
-      body,
+      name,
       user: {
         connect: {
           id: userId,
@@ -44,11 +42,11 @@ export function createNote({
   });
 }
 
-export function deleteNote({
+export function deleteGiftList({
   id,
   userId,
-}: Pick<Note, "id"> & { userId: User["id"] }) {
-  return prisma.note.deleteMany({
+}: Pick<GiftList, "id"> & { userId: User["id"] }) {
+  return prisma.giftList.deleteMany({
     where: { id, userId },
   });
 }
